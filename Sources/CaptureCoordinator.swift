@@ -33,14 +33,14 @@ class CaptureCoordinator {
             let text = try await OCREngine.recognizeText(in: image)
 
             if text.isEmpty {
-                ToastWindow.show("Metin bulunamadı", isError: true)
+                ToastWindow.show(L.noTextFound, isError: true)
             } else {
                 NSPasteboard.general.clearContents()
                 NSPasteboard.general.setString(text, forType: .string)
-                ToastWindow.show("Kopyalandı! (\(text.count) karakter)")
+                ToastWindow.show(L.copiedCount(text.count))
             }
         } catch {
-            ToastWindow.show("Hata: \(error.localizedDescription)", isError: true)
+            ToastWindow.show(L.ocrError, isError: true)
         }
     }
 

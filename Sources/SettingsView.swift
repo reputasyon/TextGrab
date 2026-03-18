@@ -15,7 +15,7 @@ struct SettingsView: View {
                 Image(systemName: "text.viewfinder")
                     .font(.system(size: 28))
                     .foregroundStyle(.secondary)
-                Text("TextGrab Ayarlar")
+                Text(L.settingsTitle)
                     .font(.title2)
                     .fontWeight(.semibold)
             }
@@ -25,15 +25,15 @@ struct SettingsView: View {
 
             // Shortcut section
             VStack(alignment: .leading, spacing: 12) {
-                Text("Klavye Kısayolu")
+                Text(L.keyboardShortcut)
                     .font(.headline)
 
-                Text("Ekrandan metin yakalama kısayolunu ayarlayın.")
+                Text(L.shortcutDesc)
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
 
                 HStack(spacing: 16) {
-                    Text("Kısayol:")
+                    Text(L.shortcutLabel)
                         .frame(width: 60, alignment: .trailing)
 
                     // Shortcut display / recorder button
@@ -44,7 +44,7 @@ struct SettingsView: View {
                             if isRecording {
                                 Image(systemName: "record.circle")
                                     .foregroundStyle(.red)
-                                Text("Bir tuş kombinasyonu girin...")
+                                Text(L.recording)
                                     .foregroundStyle(.secondary)
                             } else {
                                 Text(currentShortcut)
@@ -68,7 +68,7 @@ struct SettingsView: View {
                     .buttonStyle(.plain)
 
                     if isRecording {
-                        Button("İptal") {
+                        Button(L.cancel) {
                             stopRecording()
                         }
                         .controlSize(.small)
@@ -76,7 +76,7 @@ struct SettingsView: View {
                 }
 
                 if isRecording {
-                    Text("Kaydetmek istediğiniz tuş kombinasyonuna basın. ESC ile iptal edin.")
+                    Text(L.recordingHint)
                         .font(.caption)
                         .foregroundStyle(.orange)
                         .padding(.leading, 76)
@@ -89,14 +89,14 @@ struct SettingsView: View {
 
             // Bottom buttons
             HStack {
-                Button("Varsayılana Sıfırla") {
+                Button(L.resetToDefault) {
                     resetToDefault()
                 }
                 .disabled(PreferencesManager.shared.isDefault && !isRecording)
 
                 Spacer()
 
-                Button("Kapat") {
+                Button(L.close) {
                     stopRecording()
                     NSApp.keyWindow?.close()
                 }
@@ -108,7 +108,7 @@ struct SettingsView: View {
 
             // Footer
             HStack(spacing: 6) {
-                Text("Made by")
+                Text(L.madeBy)
                     .font(.caption2)
                     .foregroundStyle(.tertiary)
                 LinkButton(title: "@reputasyon", url: "https://github.com/reputasyon")
@@ -116,7 +116,7 @@ struct SettingsView: View {
                 Spacer()
 
                 LinkButton(
-                    title: "GitHub'da Star Ver",
+                    title: L.starOnGitHub,
                     url: "https://github.com/reputasyon/TextGrab",
                     icon: "star.fill",
                     tint: .orange
@@ -290,7 +290,7 @@ enum SettingsWindowController {
             backing: .buffered,
             defer: false
         )
-        newWindow.title = "TextGrab Ayarlar"
+        newWindow.title = L.settingsTitle
         newWindow.contentView = hostingView
         newWindow.center()
         newWindow.isReleasedWhenClosed = false

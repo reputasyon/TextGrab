@@ -23,17 +23,17 @@ struct TextGrabApp: App {
 
     var body: some Scene {
         MenuBarExtra("TextGrab", systemImage: "text.viewfinder") {
-            Button("Ekrandan Metin Yakala (\(shortcutState.label))") {
+            Button("\(L.captureText) (\(shortcutState.label))") {
                 CaptureCoordinator.shared.startCapture()
             }
 
             Divider()
 
-            Button("Ayarlar...") {
+            Button(L.settings) {
                 SettingsWindowController.show()
             }
 
-            Button("GitHub'da Star Ver") {
+            Button(L.starOnGitHub) {
                 if let url = URL(string: "https://github.com/reputasyon/TextGrab") {
                     NSWorkspace.shared.open(url)
                 }
@@ -41,7 +41,7 @@ struct TextGrabApp: App {
 
             Divider()
 
-            Button("Çıkış") {
+            Button(L.quit) {
                 NSApp.terminate(nil)
             }
             .keyboardShortcut("q")

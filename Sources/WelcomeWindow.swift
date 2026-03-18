@@ -91,11 +91,11 @@ private struct WelcomeView: View {
                         .foregroundStyle(.blue)
                         .symbolEffect(.bounce, value: appeared)
 
-                    Text("TextGrab Hazır!")
+                    Text(L.welcomeTitle)
                         .font(.title2)
                         .fontWeight(.bold)
 
-                    Text("Menu bar'a eklendi")
+                    Text(L.welcomeSubtitle)
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                 }
@@ -105,24 +105,24 @@ private struct WelcomeView: View {
                     StepRow(
                         number: "1",
                         icon: "command",
-                        text: "**\(PreferencesManager.shared.shortcutDisplayString)** tuşlarına bas"
+                        text: "**\(PreferencesManager.shared.shortcutDisplayString)** \(L.welcomeStep1)"
                     )
                     StepRow(
                         number: "2",
                         icon: "rectangle.dashed",
-                        text: "Ekranda bölge seç"
+                        text: "\(L.welcomeStep2)"
                     )
                     StepRow(
                         number: "3",
                         icon: "doc.on.clipboard",
-                        text: "Metin panoya kopyalanır"
+                        text: "\(L.welcomeStep3)"
                     )
                 }
                 .padding(.horizontal, 8)
 
                 // CTA
                 Button(action: onDismiss) {
-                    Text("Anladım")
+                    Text(L.gotIt)
                         .fontWeight(.semibold)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 6)
@@ -133,7 +133,7 @@ private struct WelcomeView: View {
                 // GitHub star
                 HStack(spacing: 4) {
                     LinkButton(
-                        title: "GitHub'da Star Ver",
+                        title: L.starOnGitHub,
                         url: "https://github.com/reputasyon/TextGrab",
                         icon: "star.fill",
                         tint: .orange
