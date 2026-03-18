@@ -88,14 +88,6 @@ class CaptureCoordinator {
             throw CaptureError.noDisplay
         }
 
-        // Convert global CG coords to display-local coords
-        let localRect = CGRect(
-            x: cgGlobalRect.origin.x - display.frame.origin.x,
-            y: cgGlobalRect.origin.y - display.frame.origin.y,
-            width: cgGlobalRect.width,
-            height: cgGlobalRect.height
-        )
-
         // Find the matching NSScreen for correct scale factor
         let scaleFactor: CGFloat = NSScreen.screens
             .first(where: { screen in
@@ -104,15 +96,33 @@ class CaptureCoordinator {
             })?
             .backingScaleFactor ?? 2.0
 
+        // Convert to display-local coords and snap to pixel boundaries
+        let rawLocal = CGRect(
+            x: cgGlobalRect.origin.x - display.frame.origin.x,
+            y: cgGlobalRect.origin.y - display.frame.origin.y,
+            width: cgGlobalRect.width,
+            height: cgGlobalRect.height
+        )
+
+        // Round to exact pixel boundaries to avoid interpolation blur
+        let localRect = CGRect(
+            x: (rawLocal.origin.x * scaleFactor).rounded(.down) / scaleFactor,
+            y: (rawLocal.origin.y * scaleFactor).rounded(.down) / scaleFactor,
+            width: (rawLocal.width * scaleFactor).rounded(.up) / scaleFactor,
+            height: (rawLocal.height * scaleFactor).rounded(.up) / scaleFactor
+        )
+
+        let pixelW = Int(localRect.width * scaleFactor)
+        let pixelH = Int(localRect.height * scaleFactor)
+
         let filter = SCContentFilter(display: display, excludingWindows: [])
 
         let config = SCStreamConfiguration()
         config.sourceRect = localRect
-        config.width = Int(localRect.width * scaleFactor)
-        config.height = Int(localRect.height * scaleFactor)
+        config.width = pixelW
+        config.height = pixelH
         config.showsCursor = false
         config.captureResolution = .best
-        config.pixelFormat = kCVPixelFormatType_32BGRA
 
         return try await SCScreenshotManager.captureImage(
             contentFilter: filter,
