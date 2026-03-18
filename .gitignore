@@ -1,0 +1,9 @@
+.DS_Store
+.build/
+.swiftpm/
+video/node_modules/
+video/package-lock.json
+video/out/
+video/.cache/
+*.xcodeproj
+xcuserdata/
