@@ -25,7 +25,7 @@
 
 ## Demo
 
-https://github.com/user-attachments/assets/textgrab-promo.mp4
+https://github.com/reputasyon/TextGrab/releases/download/v0.1.0/TextGrab-Promo.mp4
 
 > Press **Control + Option + T**, select a region, text is copied to your clipboard. That's it.
 
