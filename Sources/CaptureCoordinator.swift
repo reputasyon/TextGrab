@@ -18,6 +18,7 @@ class CaptureCoordinator {
 
     func startCapture(mode: CaptureMode = .ocr) {
         overlay = SelectionOverlay()
+        overlay?.mode = mode
         overlay?.show { [weak self] rect in
             guard let self, let rect else { return }
             Task { @MainActor in
