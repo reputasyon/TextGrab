@@ -7,11 +7,17 @@ final class PreferencesManager {
     private enum Keys {
         static let keyCode = "shortcut_keyCode"
         static let modifiers = "shortcut_modifiers"
+        static let ssKeyCode = "screenshot_keyCode"
+        static let ssModifiers = "screenshot_modifiers"
     }
 
-    // Default: Control + Option + T
+    // Default OCR: Control + Option + T
     static let defaultKeyCode: UInt32 = 17       // kVK_ANSI_T
     static let defaultModifiers: UInt32 = 0x1000 | 0x0800  // controlKey | optionKey
+
+    // Default Screenshot: Control + Option + S
+    static let defaultSSKeyCode: UInt32 = 1      // kVK_ANSI_S
+    static let defaultSSModifiers: UInt32 = 0x1000 | 0x0800  // controlKey | optionKey
 
     private let defaults = UserDefaults.standard
 
@@ -41,10 +47,54 @@ final class PreferencesManager {
         }
     }
 
+    // MARK: - Screenshot Shortcut
+
+    var ssKeyCode: UInt32 {
+        get {
+            let stored = defaults.integer(forKey: Keys.ssKeyCode)
+            return stored == 0 && !defaults.bool(forKey: "screenshot_hasBeenSet")
+                ? Self.defaultSSKeyCode
+                : UInt32(stored)
+        }
+        set {
+            defaults.set(Int(newValue), forKey: Keys.ssKeyCode)
+            defaults.set(true, forKey: "screenshot_hasBeenSet")
+        }
+    }
+
+    var ssModifiers: UInt32 {
+        get {
+            let stored = defaults.integer(forKey: Keys.ssModifiers)
+            return stored == 0 && !defaults.bool(forKey: "screenshot_hasBeenSet")
+                ? Self.defaultSSModifiers
+                : UInt32(stored)
+        }
+        set {
+            defaults.set(Int(newValue), forKey: Keys.ssModifiers)
+            defaults.set(true, forKey: "screenshot_hasBeenSet")
+        }
+    }
+
+    var ssDisplayString: String {
+        Self.displayString(keyCode: ssKeyCode, modifiers: ssModifiers)
+    }
+
+    var isSSDefault: Bool {
+        ssKeyCode == Self.defaultSSKeyCode && ssModifiers == Self.defaultSSModifiers
+    }
+
+    // MARK: - Reset
+
     func resetToDefaults() {
         defaults.removeObject(forKey: Keys.keyCode)
         defaults.removeObject(forKey: Keys.modifiers)
         defaults.removeObject(forKey: "shortcut_hasBeenSet")
+    }
+
+    func resetSSToDefaults() {
+        defaults.removeObject(forKey: Keys.ssKeyCode)
+        defaults.removeObject(forKey: Keys.ssModifiers)
+        defaults.removeObject(forKey: "screenshot_hasBeenSet")
     }
 
     var isDefault: Bool {

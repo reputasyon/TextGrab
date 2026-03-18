@@ -6,22 +6,27 @@ enum CaptureError: Error {
     case captureFailed
 }
 
+enum CaptureMode {
+    case ocr
+    case screenshot
+}
+
 @MainActor
 class CaptureCoordinator {
     static let shared = CaptureCoordinator()
     private var overlay: SelectionOverlay?
 
-    func startCapture() {
+    func startCapture(mode: CaptureMode = .ocr) {
         overlay = SelectionOverlay()
         overlay?.show { [weak self] rect in
             guard let self, let rect else { return }
             Task { @MainActor in
-                await self.captureAndRecognize(nsScreenRect: rect)
+                await self.handleCapture(nsScreenRect: rect, mode: mode)
             }
         }
     }
 
-    private func captureAndRecognize(nsScreenRect: CGRect) async {
+    private func handleCapture(nsScreenRect: CGRect, mode: CaptureMode) async {
         // Wait for overlay windows to disappear
         try? await Task.sleep(for: .milliseconds(200))
 
@@ -30,17 +35,26 @@ class CaptureCoordinator {
 
         do {
             let image = try await captureRegion(cgRect)
-            let text = try await OCREngine.recognizeText(in: image)
 
-            if text.isEmpty {
-                ToastWindow.show(L.noTextFound, isError: true)
-            } else {
+            switch mode {
+            case .ocr:
+                let text = try await OCREngine.recognizeText(in: image)
+                if text.isEmpty {
+                    ToastWindow.show(L.noTextFound, isError: true)
+                } else {
+                    NSPasteboard.general.clearContents()
+                    NSPasteboard.general.setString(text, forType: .string)
+                    ToastWindow.show(L.copiedCount(text.count))
+                }
+
+            case .screenshot:
+                let nsImage = NSImage(cgImage: image, size: NSSize(width: image.width, height: image.height))
                 NSPasteboard.general.clearContents()
-                NSPasteboard.general.setString(text, forType: .string)
-                ToastWindow.show(L.copiedCount(text.count))
+                NSPasteboard.general.writeObjects([nsImage])
+                ToastWindow.show(L.screenshotCopied)
             }
         } catch {
-            ToastWindow.show(L.ocrError, isError: true)
+            ToastWindow.show(mode == .ocr ? L.ocrError : L.captureError, isError: true)
         }
     }
 

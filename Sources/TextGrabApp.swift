@@ -3,7 +3,8 @@ import Combine
 
 @Observable
 final class ShortcutState {
-    var label: String = PreferencesManager.shared.shortcutDisplayString
+    var ocrLabel: String = PreferencesManager.shared.shortcutDisplayString
+    var ssLabel: String = PreferencesManager.shared.ssDisplayString
     private var cancellable: AnyCancellable?
 
     init() {
@@ -11,7 +12,8 @@ final class ShortcutState {
             .publisher(for: .shortcutDidChange)
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in
-                self?.label = PreferencesManager.shared.shortcutDisplayString
+                self?.ocrLabel = PreferencesManager.shared.shortcutDisplayString
+                self?.ssLabel = PreferencesManager.shared.ssDisplayString
             }
     }
 }
@@ -23,8 +25,12 @@ struct TextGrabApp: App {
 
     var body: some Scene {
         MenuBarExtra("TextGrab", systemImage: "text.viewfinder") {
-            Button("\(L.captureText) (\(shortcutState.label))") {
-                CaptureCoordinator.shared.startCapture()
+            Button("\(L.captureText) (\(shortcutState.ocrLabel))") {
+                CaptureCoordinator.shared.startCapture(mode: .ocr)
+            }
+
+            Button("\(L.captureScreenshot) (\(shortcutState.ssLabel))") {
+                CaptureCoordinator.shared.startCapture(mode: .screenshot)
             }
 
             Divider()
@@ -54,11 +60,21 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         NSApp.setActivationPolicy(.accessory)
 
         let prefs = PreferencesManager.shared
+
+        // OCR hotkey
         HotkeyManager.shared.register(
             keyCode: prefs.keyCode,
             modifiers: prefs.modifiers
         ) {
-            CaptureCoordinator.shared.startCapture()
+            CaptureCoordinator.shared.startCapture(mode: .ocr)
+        }
+
+        // Screenshot hotkey
+        HotkeyManager.shared.registerScreenshot(
+            keyCode: prefs.ssKeyCode,
+            modifiers: prefs.ssModifiers
+        ) {
+            CaptureCoordinator.shared.startCapture(mode: .screenshot)
         }
 
         WelcomeWindow.showIfNeeded()

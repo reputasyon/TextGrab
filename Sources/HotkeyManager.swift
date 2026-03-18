@@ -4,31 +4,33 @@ import AppKit
 class HotkeyManager {
     static let shared = HotkeyManager()
     private var hotKeyRef: EventHotKeyRef?
+    private var ssHotKeyRef: EventHotKeyRef?
     private var eventHandlerRef: EventHandlerRef?
-    fileprivate static var handler: (() -> Void)?
+    fileprivate static var handlers: [UInt32: () -> Void] = [:]
+
+    private func ensureEventHandler() {
+        guard eventHandlerRef == nil else { return }
+
+        var eventType = EventTypeSpec(
+            eventClass: OSType(kEventClassKeyboard),
+            eventKind: UInt32(kEventHotKeyPressed)
+        )
+
+        InstallEventHandler(
+            GetApplicationEventTarget(),
+            hotKeyCallback,
+            1,
+            &eventType,
+            nil,
+            &eventHandlerRef
+        )
+    }
 
     func register(keyCode: UInt32, modifiers: UInt32, handler: @escaping () -> Void) {
-        // Unregister any existing hotkey first
         unregister()
+        ensureEventHandler()
 
-        HotkeyManager.handler = handler
-
-        // Only install the event handler once
-        if eventHandlerRef == nil {
-            var eventType = EventTypeSpec(
-                eventClass: OSType(kEventClassKeyboard),
-                eventKind: UInt32(kEventHotKeyPressed)
-            )
-
-            InstallEventHandler(
-                GetApplicationEventTarget(),
-                hotKeyCallback,
-                1,
-                &eventType,
-                nil,
-                &eventHandlerRef
-            )
-        }
+        HotkeyManager.handlers[1] = handler
 
         let hotKeyID = EventHotKeyID(
             signature: OSType(0x54585447), // "TXTG"
@@ -45,11 +47,44 @@ class HotkeyManager {
         )
     }
 
+    func registerScreenshot(keyCode: UInt32, modifiers: UInt32, handler: @escaping () -> Void) {
+        unregisterScreenshot()
+        ensureEventHandler()
+
+        HotkeyManager.handlers[2] = handler
+
+        let hotKeyID = EventHotKeyID(
+            signature: OSType(0x54585447), // "TXTG"
+            id: 2
+        )
+
+        RegisterEventHotKey(
+            keyCode,
+            modifiers,
+            hotKeyID,
+            GetApplicationEventTarget(),
+            0,
+            &ssHotKeyRef
+        )
+    }
+
     func unregister() {
         if let ref = hotKeyRef {
             UnregisterEventHotKey(ref)
             hotKeyRef = nil
         }
+    }
+
+    func unregisterScreenshot() {
+        if let ref = ssHotKeyRef {
+            UnregisterEventHotKey(ref)
+            ssHotKeyRef = nil
+        }
+    }
+
+    func unregisterAll() {
+        unregister()
+        unregisterScreenshot()
     }
 }
 
@@ -58,6 +93,19 @@ private func hotKeyCallback(
     event: EventRef?,
     userData: UnsafeMutableRawPointer?
 ) -> OSStatus {
-    HotkeyManager.handler?()
+    guard let event else { return OSStatus(eventNotHandledErr) }
+
+    var hotKeyID = EventHotKeyID()
+    GetEventParameter(
+        event,
+        EventParamName(kEventParamDirectObject),
+        EventParamType(typeEventHotKeyID),
+        nil,
+        MemoryLayout<EventHotKeyID>.size,
+        nil,
+        &hotKeyID
+    )
+
+    HotkeyManager.handlers[hotKeyID.id]?()
     return noErr
 }

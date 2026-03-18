@@ -7,6 +7,7 @@ enum L {
 
     // Menu Bar
     static let captureText = isTurkish ? "Ekrandan Metin Yakala" : "Capture Text from Screen"
+    static let captureScreenshot = isTurkish ? "Ekran Görüntüsü Kopyala" : "Copy Screenshot"
     static let settings = isTurkish ? "Ayarlar..." : "Settings..."
     static let starOnGitHub = isTurkish ? "GitHub'da Star Ver" : "Star on GitHub"
     static let quit = isTurkish ? "Çıkış" : "Quit"
@@ -39,9 +40,16 @@ enum L {
     static func copiedCount(_ count: Int) -> String {
         isTurkish ? "Kopyalandı! (\(count) karakter)" : "Copied! (\(count) characters)"
     }
+    static let screenshotCopied = isTurkish ? "Ekran görüntüsü kopyalandı!" : "Screenshot copied!"
     static let noTextFound = isTurkish ? "Metin bulunamadı" : "No text found"
     static let captureError = isTurkish ? "Ekran yakalanamadı" : "Screen capture failed"
     static let ocrError = isTurkish ? "OCR hatası" : "OCR error"
+
+    // Settings - Screenshot
+    static let screenshotShortcut = isTurkish ? "Ekran Görüntüsü Kısayolu" : "Screenshot Shortcut"
+    static let screenshotShortcutDesc = isTurkish
+        ? "Ekran görüntüsünü panoya kopyalama kısayolu."
+        : "Shortcut for copying screenshot to clipboard."
 
     // Branding
     static let madeBy = "Made by"
