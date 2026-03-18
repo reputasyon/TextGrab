@@ -33,6 +33,12 @@ struct TextGrabApp: App {
                 SettingsWindowController.show()
             }
 
+            Button("GitHub'da Star Ver") {
+                if let url = URL(string: "https://github.com/reputasyon/TextGrab") {
+                    NSWorkspace.shared.open(url)
+                }
+            }
+
             Divider()
 
             Button("Çıkış") {
@@ -54,5 +60,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         ) {
             CaptureCoordinator.shared.startCapture()
         }
+
+        WelcomeWindow.showIfNeeded()
     }
 }

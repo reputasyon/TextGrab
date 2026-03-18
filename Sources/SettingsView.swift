@@ -103,10 +103,30 @@ struct SettingsView: View {
                 .keyboardShortcut(.cancelAction)
             }
             .padding(.horizontal)
+
+            Divider()
+
+            // Footer
+            HStack(spacing: 6) {
+                Text("Made by")
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
+                LinkButton(title: "@reputasyon", url: "https://github.com/reputasyon")
+
+                Spacer()
+
+                LinkButton(
+                    title: "GitHub'da Star Ver",
+                    url: "https://github.com/reputasyon/TextGrab",
+                    icon: "star.fill",
+                    tint: .orange
+                )
+            }
+            .padding(.horizontal)
             .padding(.bottom, 4)
         }
         .padding(20)
-        .frame(width: 440, height: 300)
+        .frame(width: 440, height: 320)
         .onDisappear {
             stopRecording()
         }
@@ -210,6 +230,38 @@ struct SettingsView: View {
     }
 }
 
+// MARK: - Link Button
+
+struct LinkButton: View {
+    let title: String
+    let url: String
+    var icon: String? = nil
+    var tint: Color = .blue
+
+    var body: some View {
+        Button {
+            if let link = URL(string: url) {
+                NSWorkspace.shared.open(link)
+            }
+        } label: {
+            HStack(spacing: 4) {
+                if let icon {
+                    Image(systemName: icon)
+                        .font(.caption2)
+                        .foregroundStyle(tint)
+                }
+                Text(title)
+                    .font(.caption2)
+            }
+            .foregroundStyle(tint.opacity(0.8))
+        }
+        .buttonStyle(.plain)
+        .onHover { hovering in
+            if hovering { NSCursor.pointingHand.push() } else { NSCursor.pop() }
+        }
+    }
+}
+
 // MARK: - Notification
 
 extension Notification.Name {
@@ -233,7 +285,7 @@ enum SettingsWindowController {
         let hostingView = NSHostingView(rootView: settingsView)
 
         let newWindow = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 440, height: 300),
+            contentRect: NSRect(x: 0, y: 0, width: 440, height: 320),
             styleMask: [.titled, .closable],
             backing: .buffered,
             defer: false
