@@ -49,20 +49,21 @@ class CaptureCoordinator {
                 }
 
             case .screenshot:
-                // Preserve full Retina resolution
-                let nsImage = NSImage(cgImage: image, size: NSSize(width: image.width, height: image.height))
+                // Write CGImage directly as PNG - no intermediate conversion
+                let bitmap = NSBitmapImageRep(cgImage: image)
+                bitmap.size = NSSize(width: image.width, height: image.height)
 
-                // Write as high-quality PNG to pasteboard
                 NSPasteboard.general.clearContents()
-                if let tiff = nsImage.tiffRepresentation,
-                   let bitmap = NSBitmapImageRep(data: tiff),
-                   let pngData = bitmap.representation(using: .png, properties: [.interlaced: false]) {
+
+                if let pngData = bitmap.representation(using: .png, properties: [.compressionFactor: 1.0]) {
+                    // PNG for full quality
                     NSPasteboard.general.setData(pngData, forType: .png)
-                    // Also set TIFF for apps that prefer it
+                }
+
+                if let tiffData = bitmap.tiffRepresentation {
+                    // TIFF for apps that prefer it (Preview, Pages, etc.)
                     NSPasteboard.general.addTypes([.tiff], owner: nil)
-                    NSPasteboard.general.setData(tiff, forType: .tiff)
-                } else {
-                    NSPasteboard.general.writeObjects([nsImage])
+                    NSPasteboard.general.setData(tiffData, forType: .tiff)
                 }
 
                 let w = image.width
@@ -95,15 +96,23 @@ class CaptureCoordinator {
             height: cgGlobalRect.height
         )
 
+        // Find the matching NSScreen for correct scale factor
+        let scaleFactor: CGFloat = NSScreen.screens
+            .first(where: { screen in
+                let cgFrame = convertToDisplayCoords(screen.frame)
+                return cgFrame.intersects(cgGlobalRect)
+            })?
+            .backingScaleFactor ?? 2.0
+
         let filter = SCContentFilter(display: display, excludingWindows: [])
 
         let config = SCStreamConfiguration()
         config.sourceRect = localRect
-        let scaleFactor = NSScreen.main?.backingScaleFactor ?? 2.0
         config.width = Int(localRect.width * scaleFactor)
         config.height = Int(localRect.height * scaleFactor)
         config.showsCursor = false
         config.captureResolution = .best
+        config.pixelFormat = kCVPixelFormatType_32BGRA
 
         return try await SCScreenshotManager.captureImage(
             contentFilter: filter,
