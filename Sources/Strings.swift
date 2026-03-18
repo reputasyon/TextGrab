@@ -51,6 +51,10 @@ enum L {
         ? "Ekran görüntüsünü panoya kopyalama kısayolu."
         : "Shortcut for copying screenshot to clipboard."
 
+    // Launch at Login
+    static let launchAtLogin = isTurkish ? "Giriş'te Otomatik Başlat" : "Launch at Login"
+    static let general = isTurkish ? "Genel" : "General"
+
     // Branding
     static let madeBy = "Made by"
 }

@@ -7,6 +7,7 @@ struct SettingsView: View {
     @State private var isRecording = false
     @State private var localMonitor: Any?
     @State private var flagsMonitor: Any?
+    @State private var launchAtLogin: Bool = LaunchAtLogin.isEnabled
 
     var body: some View {
         VStack(spacing: 20) {
@@ -20,6 +21,21 @@ struct SettingsView: View {
                     .fontWeight(.semibold)
             }
             .padding(.top, 4)
+
+            Divider()
+
+            // General section
+            VStack(alignment: .leading, spacing: 12) {
+                Text(L.general)
+                    .font(.headline)
+
+                Toggle(L.launchAtLogin, isOn: $launchAtLogin)
+                    .onChange(of: launchAtLogin) {
+                        LaunchAtLogin.toggle()
+                    }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal)
 
             Divider()
 
@@ -126,7 +142,7 @@ struct SettingsView: View {
             .padding(.bottom, 4)
         }
         .padding(20)
-        .frame(width: 440, height: 320)
+        .frame(width: 440, height: 410)
         .onDisappear {
             stopRecording()
         }
