@@ -42,6 +42,8 @@ class SelectionOverlay {
             windows.append(window)
         }
 
+        // Activate app so first click registers immediately
+        NSApp.activate(ignoringOtherApps: true)
         NSCursor.crosshair.push()
     }
 
@@ -71,6 +73,9 @@ class SelectionView: NSView {
     private var currentRect: NSRect?
 
     override var acceptsFirstResponder: Bool { true }
+
+    // First click should work immediately, not just activate the window
+    override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
 
     override func mouseDown(with event: NSEvent) {
         startPoint = convert(event.locationInWindow, from: nil)

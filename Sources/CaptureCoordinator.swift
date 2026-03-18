@@ -48,10 +48,25 @@ class CaptureCoordinator {
                 }
 
             case .screenshot:
+                // Preserve full Retina resolution
                 let nsImage = NSImage(cgImage: image, size: NSSize(width: image.width, height: image.height))
+
+                // Write as high-quality PNG to pasteboard
                 NSPasteboard.general.clearContents()
-                NSPasteboard.general.writeObjects([nsImage])
-                ToastWindow.show(L.screenshotCopied)
+                if let tiff = nsImage.tiffRepresentation,
+                   let bitmap = NSBitmapImageRep(data: tiff),
+                   let pngData = bitmap.representation(using: .png, properties: [.interlaced: false]) {
+                    NSPasteboard.general.setData(pngData, forType: .png)
+                    // Also set TIFF for apps that prefer it
+                    NSPasteboard.general.addTypes([.tiff], owner: nil)
+                    NSPasteboard.general.setData(tiff, forType: .tiff)
+                } else {
+                    NSPasteboard.general.writeObjects([nsImage])
+                }
+
+                let w = image.width
+                let h = image.height
+                ToastWindow.show("\(L.screenshotCopied) (\(w)x\(h))")
             }
         } catch {
             ToastWindow.show(mode == .ocr ? L.ocrError : L.captureError, isError: true)
