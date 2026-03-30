@@ -9,11 +9,11 @@ enum ToastWindow {
         currentWindow?.orderOut(nil)
 
         let padding: CGFloat = 16
-        let attrs: [NSAttributedString.Key: Any] = [
+        let attrString = NSAttributedString(string: message, attributes: [
             .font: NSFont.systemFont(ofSize: 14, weight: .medium),
             .foregroundColor: NSColor.white
-        ]
-        let textSize = (message as NSString).size(withAttributes: attrs)
+        ])
+        let textSize = attrString.size()
         let windowWidth = textSize.width + padding * 2 + 8
         let windowHeight: CGFloat = 40
 

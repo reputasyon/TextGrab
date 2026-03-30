@@ -222,11 +222,11 @@ class SelectionView: NSView {
 
         // Mode label below cursor
         let modeText = mode == .ocr ? "OCR" : "SS"
-        let modeAttrs: [NSAttributedString.Key: Any] = [
+        let modeAttrString = NSAttributedString(string: modeText, attributes: [
             .font: NSFont.systemFont(ofSize: 11, weight: .semibold),
             .foregroundColor: NSColor.white,
-        ]
-        let modeSize = (modeText as NSString).size(withAttributes: modeAttrs)
+        ])
+        let modeSize = modeAttrString.size()
 
         let labelW = modeSize.width + 14
         let labelH = modeSize.height + 6
@@ -243,9 +243,8 @@ class SelectionView: NSView {
         ).setFill()
         labelBg.fill()
 
-        (modeText as NSString).draw(
-            at: NSPoint(x: labelRect.midX - modeSize.width / 2, y: labelRect.midY - modeSize.height / 2),
-            withAttributes: modeAttrs
+        modeAttrString.draw(
+            at: NSPoint(x: labelRect.midX - modeSize.width / 2, y: labelRect.midY - modeSize.height / 2)
         )
     }
 
@@ -308,11 +307,12 @@ class SelectionView: NSView {
 
         // Size label
         let sizeText = "\(Int(rect.width)) x \(Int(rect.height))"
-        let attrs: [NSAttributedString.Key: Any] = [
-            .font: NSFont.monospacedSystemFont(ofSize: 12, weight: .medium),
+        let font = NSFont.monospacedSystemFont(ofSize: 12, weight: .medium)
+        let attrString = NSAttributedString(string: sizeText, attributes: [
+            .font: font,
             .foregroundColor: NSColor.white,
-        ]
-        let textSize = (sizeText as NSString).size(withAttributes: attrs)
+        ])
+        let textSize = attrString.size()
 
         let labelW = textSize.width + 14
         let labelH = textSize.height + 8
@@ -326,9 +326,8 @@ class SelectionView: NSView {
         NSColor.black.withAlphaComponent(0.7).setFill()
         bg.fill()
 
-        (sizeText as NSString).draw(
-            at: NSPoint(x: labelRect.midX - textSize.width / 2, y: labelRect.midY - textSize.height / 2),
-            withAttributes: attrs
+        attrString.draw(
+            at: NSPoint(x: labelRect.midX - textSize.width / 2, y: labelRect.midY - textSize.height / 2)
         )
     }
 }
