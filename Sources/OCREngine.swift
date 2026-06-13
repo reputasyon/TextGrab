@@ -30,11 +30,18 @@ enum OCREngine {
                     continuation.resume(returning: text)
                 }
 
+                // Use the newest text-recognition revision the OS supports
+                // for better accuracy on small / dense text.
+                if VNRecognizeTextRequest.supportedRevisions.contains(VNRecognizeTextRequestRevision3) {
+                    request.revision = VNRecognizeTextRequestRevision3
+                }
                 request.recognitionLevel = .accurate
                 request.recognitionLanguages = ["tr", "en", "de", "fr"]
                 request.usesLanguageCorrection = true
+                // Detect even small text instead of dropping it.
+                request.minimumTextHeight = 0.0
 
-                let handler = VNImageRequestHandler(cgImage: image)
+                let handler = VNImageRequestHandler(cgImage: image, options: [:])
                 do {
                     try handler.perform([request])
                 } catch {

@@ -35,7 +35,7 @@ class CaptureCoordinator {
         let cgRect = convertToDisplayCoords(nsScreenRect)
 
         do {
-            let image = try await captureRegion(cgRect)
+            let (image, scaleFactor) = try await captureRegion(cgRect)
 
             switch mode {
             case .ocr:
@@ -51,7 +51,13 @@ class CaptureCoordinator {
             case .screenshot:
                 // Write CGImage directly as PNG - no intermediate conversion
                 let bitmap = NSBitmapImageRep(cgImage: image)
-                bitmap.size = NSSize(width: image.width, height: image.height)
+                // Report size in POINTS (pixels / scale) so retina captures
+                // paste at correct logical size instead of 2x (which apps
+                // downscale and blur).
+                bitmap.size = NSSize(
+                    width: CGFloat(image.width) / scaleFactor,
+                    height: CGFloat(image.height) / scaleFactor
+                )
 
                 NSPasteboard.general.clearContents()
 
@@ -75,7 +81,7 @@ class CaptureCoordinator {
         }
     }
 
-    private func captureRegion(_ cgGlobalRect: CGRect) async throws -> CGImage {
+    private func captureRegion(_ cgGlobalRect: CGRect) async throws -> (CGImage, CGFloat) {
         let content = try await SCShareableContent.excludingDesktopWindows(
             false,
             onScreenWindowsOnly: true
@@ -123,11 +129,15 @@ class CaptureCoordinator {
         config.height = pixelH
         config.showsCursor = false
         config.captureResolution = .best
+        // Capture in Display P3 so colors stay vivid instead of being
+        // flattened into a generic color space (washed-out look).
+        config.colorSpaceName = CGColorSpace.displayP3
 
-        return try await SCScreenshotManager.captureImage(
+        let image = try await SCScreenshotManager.captureImage(
             contentFilter: filter,
             configuration: config
         )
+        return (image, scaleFactor)
     }
 
     private func convertToDisplayCoords(_ rect: CGRect) -> CGRect {
